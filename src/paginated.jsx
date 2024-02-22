@@ -3,9 +3,9 @@ import { debounce } from "lodash";
 import { useSearchParams } from "react-router-dom";
 
 function Products() {
-  const [searchParams, setSerchParams] = useSearchParams({
+  const [searchParams, setSearchParams] = useSearchParams({
     skip: 0,
-    limit: 20,
+    limit: 4,
   });
   const category = searchParams.get("category") || "";
   const { data: categories } = useQuery({
@@ -28,10 +28,14 @@ function Products() {
   } = useQuery({
     queryKey: ["products", limit, skip, q, category],
     queryFn: async () => {
-      let url = `https://dummyjson.com/products/search?limit=${limit}&skip=${skip}&q=${q}`;
-      if (!category) url;
+      let url = "";
       if (category) {
         url = `https://dummyjson.com/products/category/${category}?limit=${limit}&skip=${skip}`;
+        if (q) {
+          url += `&q=${q}`;
+        }
+      } else {
+        url = `https://dummyjson.com/products/search?limit=${limit}&skip=${skip}&q=${q}`;
       }
       const data = await fetch(url).then((res) => res.json());
       return data;
@@ -48,7 +52,7 @@ function Products() {
   // Function
 
   const handleMove = (movecount) => {
-    setSerchParams((prev) => {
+    setSearchParams((prev) => {
       prev.set("skip", Math.max(skip + movecount, 0));
       return prev;
     });
@@ -74,7 +78,7 @@ function Products() {
             <div className="relative mt-2 rounded-md flex items-center gap-8 mb-4">
               <input
                 onChange={debounce((e) => {
-                  setSerchParams((prev) => {
+                  setSearchParams((prev) => {
                     prev.delete("category");
                     prev.set("q", e.target.value);
                     prev.set("skip", 0);
@@ -90,7 +94,7 @@ function Products() {
               <select
                 className="border p-2"
                 onChange={(e) => {
-                  setSerchParams((prev) => {
+                  setSearchParams((prev) => {
                     prev.set("skip", 0);
                     prev.delete("q");
                     prev.set("category", e.target.value);
