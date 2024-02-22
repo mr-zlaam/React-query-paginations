@@ -27,6 +27,7 @@ function Products() {
     error,
   } = useQuery({
     queryKey: ["products", limit, skip, q, category],
+    staleTime: 120000,
     queryFn: async () => {
       let url = "";
       if (category) {
